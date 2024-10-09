@@ -1,13 +1,30 @@
-// import {getTaxis} from "../models/taxisModel";
-import { Request,Response } from "express";
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-export const  taxisControllers= async (req: Request, res:Response) => {
+const prisma = new PrismaClient();
+
+export const getAllTaxis = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {plate, page = 1, limit = 10} = req.query;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const plate = req.query.plate as string; // Obtiene plate
 
-        const pageNumber = parseInt(page as string, 10);
-        const limitNumber = parseInt(limit as string, 10);
-
-        const taxis = await getTaxis
+        const taxis = await prisma.taxis.findMany({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: plate ? {
+                plate: {
+                    startsWith: plate,   
+                    mode: 'insensitive',
+                },
+            } : undefined,
+            select: {
+                id: true,
+                plate: true,
+            },
+        });
+        res.json(taxis);
+    } catch (error) {
+        res.status(400).json({ error: 'Error al obtener los registros de taxis' });
     }
-}
+};
