@@ -9,6 +9,15 @@ export const getAllTaxis = async (req: Request, res: Response): Promise<void> =>
         const limit = parseInt(req.query.limit as string) || 10;
         const plate = req.query.plate as string; // Obtiene plate
 
+        if (isNaN(page) || page < 1) {
+            res.status(400).json({ error: 'pagina o limite invalido' });
+            return; 
+        }
+
+        if (isNaN(limit) || limit < 1) {
+            res.status(400).json({ error: 'pagina o limite invalido' });
+            return;
+        }
         const taxis = await prisma.taxis.findMany({
             skip: (page - 1) * limit,
             take: limit,
@@ -23,6 +32,12 @@ export const getAllTaxis = async (req: Request, res: Response): Promise<void> =>
                 plate: true,
             },
         });
+
+        if (taxis.length === 0) {
+            res.status(400).json({ error: 'Página no encontrada' });
+            return;//sale de la fx sin retornar valor
+        }
+        
         res.json(taxis);
     } catch (error) {
         res.status(400).json({ error: 'Error al obtener los registros de taxis' });

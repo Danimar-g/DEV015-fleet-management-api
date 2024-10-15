@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllTrajectories } from '../controllers/trajectoriesController';
+import { getAllTrajectories } from '../controllers/trajectoriesControllers';
 
 const router: Router = Router();
 
